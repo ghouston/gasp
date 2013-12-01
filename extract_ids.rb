@@ -21,7 +21,7 @@ end
 
 class FoundCv
 	def handle( row )
-		puts row[0]
+		puts row[0][2..-1]
 		LookingForCv.new
   end
 end

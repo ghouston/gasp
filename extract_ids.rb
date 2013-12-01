@@ -1,6 +1,13 @@
 require 'csv'
 
-$ids = []
+def main
+	state = LookingForCv.new
+	# tried CSV.filter but no way to remove rows in output.
+	ARGF.each_line do |line|
+		row = CSV.parse_line line
+		state = state.handle(row)
+	end
+end
 
 class LookingForCv
 	def handle( row )
@@ -15,16 +22,9 @@ end
 class FoundCv
 	def handle( row )
 		puts row[0]
-		$ids << row[0]
 		LookingForCv.new
   end
 end
 
-state = LookingForCv.new
+main()
 
-CSV.foreach("source_data/2013MarchresultsEXCEL_Gregcvs.csv") do |row|
-	state = state.handle(row)  
-end
-
-#puts $ids.join(",")
-#puts $ids.count

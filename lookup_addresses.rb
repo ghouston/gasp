@@ -26,27 +26,28 @@ class LookupAddresses
 		FileUtils.rm( LOG_FILE )
 		@agent.log = Logger.new( LOG_FILE )  
 
-		CSV.foreach('source_data/small.csv') do |row|
-		  # page = homepage()
-			# pp page
-			# break
-
-			property_search()
+		CSV.foreach('source_data/extracted_ids.csv') do |row|
+			pid = row[0][-16..-1]
+			property_search(pid)
 		end
 	end
 
-  def property_search
+	# format_parcel_id("2200133001022000") #=> '22 00 13 3 001 022.000'
+	def format_parcel_id(pid)
+		"#{pid[0..1]} #{pid[2..3]} #{pid[4..5]} #{pid[6]} #{pid[7..9]} #{pid[10..12]}.#{pid[13..15]}"
+	end
+
+  def property_search(pid)
 		page = @agent.get('http://eringcapture.jccal.org/caportal/CA_PropertyTaxSearch.aspx')
+
 		form = page.form("thisForm")
-		form.field_with(:name => "HidParcelNo").value = '22 00 13 3 001 022.000'
+		form.field_with(:name => "HidParcelNo").value = format_parcel_id(pid)
 		form.field_with(:name => "HiddenVal").value = ''
 		form.field_with(:name => "NextRecord").value = '1'
-		# form.field_with(:name => "SearchRadio").value = 'SearchByParcel'
-		form.field_with(:name => "SearchText").value = '2200133001022000'
+		form.field_with(:name => "SearchText").value = pid
 		form.field_with(:name => "TaxYear").value = '2013'
 		buttons = form.radiobuttons.select { |b| b.value == "SearchByParcel" }
 		buttons.first.check
-
 		buttons = form.buttons.select { |b| b.name == "Search" }
 		button = buttons.first
 
@@ -61,7 +62,7 @@ class LookupAddresses
 				data = td.text.split(/[\r\n\u00a0]+/m)
 				data.each { |t| t.strip! }
 				data = data.select { |t| t.length > 0 }
-				pp data
+				puts "\"#{pid}\",\"#{data.join(', ')}\""
 				state = :looking
 			end
 		end
@@ -78,4 +79,11 @@ class LookupAddresses
 end
 
 LookupAddresses.new.main
+
+=begin
+http://eringcapture.jccal.org/caportal/CA_PropertyTaxParcelNavigation.aspx?ParcelNo=22%2000%2013%204%20035%20017.001&RecordYear=2013
+ParcelNo	22 00 13 4 035 017.001
+RecordYear	2013
+
+=end
 

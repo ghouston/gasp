@@ -1,2 +1,2 @@
-source_data/
-*.sublime-workspace
+data/
+*.sublime-*

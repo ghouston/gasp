@@ -13,7 +13,7 @@ class LookupAddresses
 	def main
 		setup_mechanize  
 
-		CSV.foreach(ARGF.file) do |row|
+		CSV.new(ARGF).each do |row|
 			property_search(row[0])
 		end
 	end

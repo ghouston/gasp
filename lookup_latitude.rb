@@ -33,13 +33,12 @@ class LookupLatitude
   end
 
   def lookup_latitude(address)
+    return ["",""] if address.eql? ""
+
     url="http://maps.googleapis.com/maps/api/geocode/json?address=#{URI::encode(address)}&sensor=false"
     result = @agent.get(url)
     json_parser = JSON::Ext::Parser.new(result.content)
     json = json_parser.parse
-    puts json
-    
-    return ["",""] if json.nil?
     lat_and_lng = [ json["results"][0]['geometry']['location']['lat'], json["results"][0]['geometry']['location']['lng'] ]
   end
 
